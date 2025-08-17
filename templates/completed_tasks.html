@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Completed Tasks{% endblock %}
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-8">
+    <h2><i class="bi bi-check-circle-fill text-success"></i> Completed Tasks</h2>
+  </div>
+  <div class="col-md-4 text-end">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<!-- Summary Statistics Cards -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-bg-success mb-3">
+      <div class="card-body text-center">
+        <h5 class="card-title"><i class="bi bi-check-circle"></i> Total Completed</h5>
+        <p class="card-text fs-3">{{ total_completed }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-info mb-3">
+      <div class="card-body text-center">
+        <h5 class="card-title"><i class="bi bi-calendar-check"></i> Completed Today</h5>
+        <p class="card-text fs-3">{{ completed_today }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-warning mb-3">
+      <div class="card-body text-center">
+        <h5 class="card-title"><i class="bi bi-calendar-week"></i> This Week</h5>
+        <p class="card-text fs-3">{{ completed_this_week }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task Details Section -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Task Details</h5>
+  </div>
+  <div class="card-body">
+    {% if completed_tasks %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Task</th>
+              <th>Priority</th>
+              <th>Due Date</th>
+              <th>Created</th>
+              <th>Completed</th>
+              <th>Completion Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for task in completed_tasks %}
+              <tr>
+                <td>{{ task.task }}</td>
+                <td>
+                  <span class="badge 
+                    {% if task.priority == 'High' %}bg-danger
+                    {% elif task.priority == 'Medium' %}bg-warning text-dark
+                    {% else %}bg-secondary
+                    {% endif %}">
+                    {{ task.priority }}
+                  </span>
+                </td>
+                <td>
+                  {% if task.due_date %}
+                    {{ task.due_date.strftime('%Y-%m-%d') }}
+                    {% if task.due_date < today and not task.completed %}
+                      <span class="text-danger">(Late)</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if task.created_at %}
+                    {{ task.created_at.strftime('%Y-%m-%d %H:%M') }}
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if task.completed_at %}
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    {{ task.completed_at.strftime('%Y-%m-%d %H:%M') }}
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if task.completed_at and task.created_at %}
+                    {% set duration = (task.completed_at - task.created_at).total_seconds() %}
+                    {% if duration < 3600 %}
+                      {{ (duration / 60) | round(1) }} minutes
+                    {% elif duration < 86400 %}
+                      {{ (duration / 3600) | round(1) }} hours
+                    {% else %}
+                      {{ (duration / 86400) | round(1) }} days
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('complete', id=task.id) }}" class="btn btn-outline-warning btn-sm" title="Mark as Incomplete">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </a>
+                  <a href="{{ url_for('edit', task_id=task.id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="{{ url_for('delete', id=task.id) }}" class="btn btn-outline-danger btn-sm" title="Delete" onclick="return confirm('Are you sure you want to delete this task?');">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle fs-1"></i>
+        <h4 class="mt-3">No completed tasks yet!</h4>
+        <p class="mb-3">Start completing your tasks to see them here.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+          <i class="bi bi-arrow-left"></i> Go to To-Do List
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-4">
+  <a href="{{ url_for('index') }}" class="btn btn-primary">
+    <i class="bi bi-list-task"></i> View All Tasks
+  </a>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-bar-chart"></i> Dashboard
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-bg-primary mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-list-task"></i> Total Tasks</h5>
+        <p class="card-text fs-3">{{ total }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-check-circle"></i> Completed</h5>
+        <p class="card-text fs-3">{{ completed }}</p>
+        {% if completed > 0 %}
+        <a href="{{ url_for('completed_tasks') }}" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-eye"></i> View Completed
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-warning mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-hourglass-split"></i> Incomplete</h5>
+        <p class="card-text fs-3">{{ incomplete }}</p>
+        {% if incomplete > 0 %}
+        <a href="{{ url_for('incomplete_tasks') }}" class="btn btn-outline-dark btn-sm">
+          <i class="bi bi-eye"></i> View Pending
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-info mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Completion Rate</h5>
+        <p class="card-text fs-3">{{ completion_rate }}%</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-bg-secondary mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-fire"></i> Streak</h5>
+        <p class="card-text fs-3">{{ streak }} day{{ 's' if streak != 1 else '' }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-dark mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-clock-history"></i> Avg. Completion Time</h5>
+        <p class="card-text fs-3">{{ avg_completion_time if avg_completion_time is not none else '-' }} hours</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-light mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-bar-chart-line"></i> Completions (Last 7 Days)</h5>
+        <canvas id="completionsChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<h4>Priority Distribution</h4>
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="progress" style="height: 30px;">
+      {% set total_priority = priority_data['High'] + priority_data['Medium'] + priority_data['Low'] %}
+      <div class="progress-bar bg-danger" role="progressbar" style="width: {{ (priority_data['High']/total_priority*100) if total_priority else 0 }}%" aria-valuenow="{{ priority_data['High'] }}" aria-valuemin="0" aria-valuemax="{{ total_priority }}">High ({{ priority_data['High'] }})</div>
+      <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: {{ (priority_data['Medium']/total_priority*100) if total_priority else 0 }}%" aria-valuenow="{{ priority_data['Medium'] }}" aria-valuemin="0" aria-valuemax="{{ total_priority }}">Medium ({{ priority_data['Medium'] }})</div>
+      <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ (priority_data['Low']/total_priority*100) if total_priority else 0 }}%" aria-valuenow="{{ priority_data['Low'] }}" aria-valuemin="0" aria-valuemax="{{ total_priority }}">Low ({{ priority_data['Low'] }})</div>
+    </div>
+  </div>
+</div>
+<a href="{{ url_for('index') }}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Back to To-Do List</a>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('completionsChart').getContext('2d');
+const completionsChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: {{ completions_labels|tojson }},
+    datasets: [{
+      label: 'Tasks Completed',
+      data: {{ completions_chart|tojson }},
+      backgroundColor: '#0d6efd',
+      borderRadius: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, precision: 0 }
+    }
+  }
+});
+</script>
+{% endblock %}

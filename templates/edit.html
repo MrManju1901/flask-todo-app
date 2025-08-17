@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Edit Task{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <h2>Edit Task</h2>
+    <form method="POST">
+      <div class="mb-3">
+        <label for="task" class="form-label">Task</label>
+        <input type="text" class="form-control" id="task" name="task" value="{{ task.task }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="priority" class="form-label">Priority</label>
+        <select class="form-select" id="priority" name="priority">
+          <option value="High" {% if task.priority == 'High' %}selected{% endif %}>High</option>
+          <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium</option>
+          <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="due_date" class="form-label">Due Date</label>
+        <input type="date" class="form-control" id="due_date" name="due_date" value="{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '' }}">
+      </div>
+      <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save</button>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2"><i class="bi bi-arrow-left"></i> Back</a>
+    </form>
+    <script>
+      // Dark mode toggle logic (optional, if you want to sync with index.html)
+    </script>
+  </div>
+</div>
+{% endblock %}
